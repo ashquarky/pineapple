@@ -82,21 +82,30 @@ void renderScreen() {
 }
 
 #define WINDOW_HEIGHT 17
-
+/* 
+	A very cool function that turns a normal char buffer into a scrolling text console! ooh!
+*/
 void addToPrintBuf(char* text) {
+	//If it's the first line, just append text
 	if (printBufLines == 0) {
 		__os_snprintf(printBuf, 1023, "%s%s", printBuf, text);
 		printBufLines++;
+	//If the Gamepad is out of space, we need to remove the top line from view.
+	//This will make room for the new line.
 	} else if (printBufLines == WINDOW_HEIGHT) {
+		//Loop through and try to find the first \n (end of the top line)
 		for (unsigned int i = 0; i < strlen(printBuf); i++) {
 			if (printBuf[i] == '\n') {
+				//Move text *after* the \n backwards to the start of the array
 				memcpy(printBuf, printBuf + i + 1, strlen(printBuf) - i - 1);
+				//Fix the null char
 				printBuf[strlen(printBuf) - i - 1] = 0x00;
+				//Append text
 				__os_snprintf(printBuf, 1023, "%s\n%s", printBuf, text);
 				break;
 			}
 		}
-		
+	//Otherwise, just a normal print. Append with a newline.
 	} else {
 		__os_snprintf(printBuf, 1023, "%s\n%s", printBuf, text);
 		printBufLines++;
