@@ -5,19 +5,23 @@
 
 #include <stdlib.h>
 #include <string.h>
+//$DEVKITPRO/portlibs/ppc/include/iosuhax/iosuhax.h
+//This may change if a new standard arises
+#include <iosuhax/iosuhax.h>
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/vpad_functions.h"
+#include "extra_functions.h"
 
 void renderScreen();
 void addToPrintBuf(char* text);
 
 char* printBuf;
-unsigned int printBufLen = 0;
 unsigned int printBufLines = 0;
 
 int Menu_Main() {
 	InitOSFunctionPointers();
 	InitVPadFunctionPointers();
+	InitExtraFunctionPointers();
 
 	OSScreenInit();
 	
@@ -31,12 +35,10 @@ int Menu_Main() {
 		
 	printBuf = malloc(1024);
 	
-	char buf[10];
-	for (int i = 0; i < 100; i++) {
-		__os_snprintf(buf, 9, "n: %d", i);
-		addToPrintBuf(buf);
-		renderScreen();
-	}
+	char buf[256];
+	__os_snprintf(buf, 255, "0x%08X", IOSUHAX_Open());
+	addToPrintBuf(buf);
+	renderScreen();
 	
 	VPADInit();
 
