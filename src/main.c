@@ -1,118 +1,63 @@
-#include <string.h>
-#include <stdarg.h>
+/*
+	PINEAPPLE
+	https://github.com/QuarkTheAwesome/pineapple
+*/
+
 #include <stdlib.h>
-#include <malloc.h>
 #include "dynamic_libs/os_functions.h"
-#include "dynamic_libs/fs_functions.h"
-#include "dynamic_libs/gx2_functions.h"
-#include "dynamic_libs/sys_functions.h"
 #include "dynamic_libs/vpad_functions.h"
-#include "dynamic_libs/padscore_functions.h"
-#include "dynamic_libs/socket_functions.h"
-#include "dynamic_libs/ax_functions.h"
-#include "fs/fs_utils.h"
-#include "fs/sd_fat_devoptab.h"
-#include "system/memory.h"
-#include "utils/logger.h"
-#include "utils/utils.h"
-#include "common/common.h"
 
-/* Entry point */
-int Menu_Main(void)
-{
-    //!*******************************************************************
-    //!                   Initialize function pointers                   *
-    //!*******************************************************************
-    //! do OS (for acquire) and sockets first so we got logging
-    InitOSFunctionPointers();
-    InitSocketFunctionPointers();
+int Menu_Main() {
+	InitOSFunctionPointers();
+	InitVPadFunctionPointers();
 
-    log_init("192.168.178.3");
-    log_print("Starting launcher\n");
+	OSScreenInit();
+	
+	unsigned int buffer0Size = OSScreenGetBufferSizeEx(0);
+	unsigned int totalBufferSize = buffer0Size + OSScreenGetBufferSizeEx(1);
+	
+	OSScreenSetBufferEx(0, (void*)0xF4000000);
+	OSScreenSetBufferEx(1, (void*)(0xF4000000 + buffer0Size));
+	
+	OSScreenEnableEx(0, 1);
+	OSScreenEnableEx(1, 1);
+	
+	OSScreenClearBufferEx(0, 0x000000FF);
+	OSScreenClearBufferEx(1, 0x000000FF);
+	
+	OSScreenPutFontEx(0, 0, 0, "Hello World!");
+	OSScreenPutFontEx(1, 0, 0, "Hello World 2!");
+	
+	DCFlushRange((void*)0xF4000000, totalBufferSize);
+	
+	OSScreenFlipBuffersEx(0);
+	OSScreenFlipBuffersEx(1);
+	
+	VPADInit();
 
-    InitFSFunctionPointers();
-    InitVPadFunctionPointers();
+	VPADData vpad;
+	int error;
 
-    log_print("Function exports loaded\n");
+	for (;;) {
+		VPADRead(0, &vpad, 1, &error);
 
-    //!*******************************************************************
-    //!                    Initialize heap memory                        *
-    //!*******************************************************************
-    log_print("Initialize memory management\n");
-    //! We don't need bucket and MEM1 memory so no need to initialize
-    memoryInitialize();
-
-    //!*******************************************************************
-    //!                        Initialize FS                             *
-    //!*******************************************************************
-    log_printf("Mount SD partition\n");
-    mount_sd_fat("sd");
-
-    VPADInit();
-
-    // Prepare screen
-    int screen_buf0_size = 0;
-    int screen_buf1_size = 0;
-
-    // Init screen and screen buffers
-    OSScreenInit();
-    screen_buf0_size = OSScreenGetBufferSizeEx(0);
-    screen_buf1_size = OSScreenGetBufferSizeEx(1);
-
-    unsigned char *screenBuffer = MEM1_alloc(screen_buf0_size + screen_buf1_size, 0x40);
-
-    OSScreenSetBufferEx(0, screenBuffer);
-    OSScreenSetBufferEx(1, (screenBuffer + screen_buf0_size));
-
-    OSScreenEnableEx(0, 1);
-    OSScreenEnableEx(1, 1);
-
-    // Clear screens
-    OSScreenClearBufferEx(0, 0);
-    OSScreenClearBufferEx(1, 0);
-
-    // print to TV
-    OSScreenPutFontEx(0, 0, 0, "Hello world on TV!!!");
-    OSScreenPutFontEx(0, 0, 1, "Press HOME-Button to exit.");
-
-    // print to DRC
-    OSScreenPutFontEx(1, 0, 0, "Hello world on DRC!!!");
-    OSScreenPutFontEx(1, 0, 1, "Press HOME-Button to exit.");
-
-    // Flush the cache
-    DCFlushRange(screenBuffer, screen_buf0_size);
-    DCFlushRange((screenBuffer + screen_buf0_size), screen_buf1_size);
-
-    // Flip buffers
-    OSScreenFlipBuffersEx(0);
-    OSScreenFlipBuffersEx(1);
-
-    int vpadError = -1;
-    VPADData vpad;
-
-    while(1)
-    {
-        VPADRead(0, &vpad, 1, &vpadError);
-
-        if(vpadError == 0 && ((vpad.btns_d | vpad.btns_h) & VPAD_BUTTON_HOME))
-            break;
-
-		usleep(50000);
-    }
-
-	MEM1_free(screenBuffer);
-	screenBuffer = NULL;
-
-    //!*******************************************************************
-    //!                    Enter main application                        *
-    //!*******************************************************************
-
-    log_printf("Unmount SD\n");
-    unmount_sd_fat("sd");
-    log_printf("Release memory\n");
-    memoryRelease();
-    log_deinit();
-
-    return EXIT_SUCCESS;
+		if (!error) {
+			if (vpad.btns_h & VPAD_BUTTON_HOME) {
+				break;
+			}
+		}
+	}
+	
+	OSScreenClearBufferEx(0, 0x00000000);
+	OSScreenClearBufferEx(1, 0x00000000);
+	
+	OSScreenFlipBuffersEx(0);
+	OSScreenFlipBuffersEx(1);
+	
+	OSScreenClearBufferEx(0, 0x00000000);
+	OSScreenClearBufferEx(1, 0x00000000);
+	
+	DCFlushRange((void*)0xF4000000, totalBufferSize);
+	
+	return EXIT_SUCCESS;
 }
-
