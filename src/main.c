@@ -15,6 +15,7 @@
 void renderScreen();
 void addToPrintBuf(char* text);
 
+#define PRINT_BUF_SIZE 2048
 char* printBuf;
 unsigned int printBufLines = 0;
 
@@ -33,12 +34,16 @@ int Menu_Main() {
 	OSScreenEnableEx(0, 1);
 	OSScreenEnableEx(1, 1);
 		
-	printBuf = malloc(1024);
+	printBuf = malloc(PRINT_BUF_SIZE);
+	
+	int iosuhax = IOSUHAX_Open();
 	
 	char buf[256];
-	__os_snprintf(buf, 255, "0x%08X", IOSUHAX_Open());
+	__os_snprintf(buf, 255, "/dev/iosuhax handle: 0x%08X (%d)", iosuhax, iosuhax);
 	addToPrintBuf(buf);
 	renderScreen();
+	
+	IOSUHAX_Close();
 	
 	VPADInit();
 
@@ -90,7 +95,7 @@ void renderScreen() {
 void addToPrintBuf(char* text) {
 	//If it's the first line, just append text
 	if (printBufLines == 0) {
-		__os_snprintf(printBuf, 1023, "%s%s", printBuf, text);
+		__os_snprintf(printBuf, PRINT_BUF_SIZE - 1, "%s%s", printBuf, text);
 		printBufLines++;
 	//If the Gamepad is out of space, we need to remove the top line from view.
 	//This will make room for the new line.
@@ -103,13 +108,13 @@ void addToPrintBuf(char* text) {
 				//Fix the null char
 				printBuf[strlen(printBuf) - i - 1] = 0x00;
 				//Append text
-				__os_snprintf(printBuf, 1023, "%s\n%s", printBuf, text);
+				__os_snprintf(printBuf, PRINT_BUF_SIZE - 1, "%s\n%s", printBuf, text);
 				break;
 			}
 		}
 	//Otherwise, just a normal print. Append with a newline.
 	} else {
-		__os_snprintf(printBuf, 1023, "%s\n%s", printBuf, text);
+		__os_snprintf(printBuf, PRINT_BUF_SIZE - 1, "%s\n%s", printBuf, text);
 		printBufLines++;
 	}
 }
