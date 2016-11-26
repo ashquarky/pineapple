@@ -7,10 +7,10 @@
 #include <string.h>
 //$DEVKITPRO/portlibs/ppc/include/iosuhax/iosuhax.h
 //This may change if a new standard arises
-#include <iosuhax/iosuhax.h>
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/extra_functions.h"
+#include "iosuhax_init.h"
 #include "screen.h"
 
 int Menu_Main() {
@@ -19,15 +19,24 @@ int Menu_Main() {
 	InitExtraFunctionPointers();
 
 	screenInit();
-
-	int iosuhax = IOSUHAX_Open();
 	
-	char buf[256];
-	__os_snprintf(buf, 255, "/dev/iosuhax handle: 0x%08X (%d)", iosuhax, iosuhax);
-	addToPrintBuf(buf);
+	addToPrintBuf("Pineapple v0.0.1");
 	renderScreen();
 	
-	IOSUHAX_Close();
+	int ret = iosuhaxInit();
+	if (ret < 0) {
+		//error behaviour
+		goto promptAndExit;
+	}
+	
+	addToPrintBuf("Cleaning up...");
+	renderScreen();
+	
+	iosuhaxShutdown();
+
+promptAndExit:	
+	addToPrintBuf("Press HOME to exit.");
+	renderScreen();
 	
 	VPADInit();
 
