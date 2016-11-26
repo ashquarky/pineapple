@@ -10,7 +10,7 @@
 #include <iosuhax/iosuhax.h>
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/vpad_functions.h"
-#include "extra_functions.h"
+#include "dynamic_libs/extra_functions.h"
 #include "screen.h"
 
 int Menu_Main() {
