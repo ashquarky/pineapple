@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Data gathered by CreeperMario -->
+<haxchi_apps>
+	<app>
+		<name>東北大学未来科学技術共同研究センター川島隆太教授監修 脳を鍛える大人のDSトレーニング</name>
+		<lang>jp</lang>
+		<titleid_upper>00050000</titleid_upper>
+		<titleid_lower>10179A00</titleid_lower>
+		<inject_url>https://github.com/FIX94/haxchi/releases/download/v1.8/brainage.zip</inject_url>
+		<inject_loc>/content/rom.zip</inject_loc>
+	</app>
+	<app>
+		<name>Brain Age™: Train Your Brain in Minutes a Day!</name>
+		<lang>us</lang>
+		<titleid_upper>00050000</titleid_upper>
+		<titleid_lower>10179B00</titleid_lower>
+		<inject_url>https://github.com/FIX94/haxchi/releases/download/v1.8/brainage.zip</inject_url>
+		<inject_loc>/content/rom.zip</inject_loc>
+	</app>
+	<app>
+		<name>Dr Kawashima’s BRAIN TRAINING™: How Old is Your Brain?</name>
+		<lang>us</lang>
+		<titleid_upper>00050000</titleid_upper>
+		<titleid_lower>10179C00</titleid_lower>
+		<inject_url>https://github.com/FIX94/haxchi/releases/download/v1.8/brainage.zip</inject_url>
+		<inject_loc>/content/rom.zip</inject_loc>
+	</app>
+</haxchi_apps>
